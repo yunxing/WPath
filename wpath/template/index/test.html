@@ -1,0 +1,21 @@
+<html>
+  <head>
+    <title>test</title>
+  </head>
+  <body>
+    <h1>test</h1>
+    testtest
+    {% if nodelist %}
+    <ul>
+      {% for node in nodelist %}
+      <li><a href="http://en.wikipedia.org{{ node.href }}/">{{ node.content }}</a></li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <p>No results</p>
+    {% endif %}
+    <address>
+      <a href="mailto:root@nov503">Yunxing Dai</a>
+    </address>
+  </body>
+</html>
