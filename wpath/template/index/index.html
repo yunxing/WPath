@@ -1,12 +1,79 @@
 <html>
   <head>
 <title>cooool stuff</title>
+<style type="text/css">
+    #message a{
+        display:block;
+        display:none;
+        right:5px;
+        position:fixed;
+        bottom:5px;
+        right:10px;
+        z-index: 999; 
+        -moz-border-radius: 24px;
+        -webkit-border-radius: 24px;
+        width: 100px;
+        line-height: 28px;
+        text-decoration:none;
+        height: 28px;
+        opacity: .8;
+        padding: 5px;
+        background-color: #000;
+        font-size: 14px;
+        text-align: center;
+        color: #fff;
+    }
+</style>
 </head>
 <body>
-<h1>cooool stuff</h1>
-
-<address>
-<a href="mailto:root@nov503">Yunxing Dai</a>
-</address>
+<h1 id="top">cooool stuff</h1>
+<div style="height:800px;border:1px black solid" >
+    <form action="" method="POST">
+        <p>
+            start:<input type="textbox" name="start" value="yahoo"/>
+        </p>
+        <p>
+            end:<input type="textbox" name="start" value="microsoft"/>
+        </p>
+        <input type="submit" value="find" />
+    </form>
+</div>
+<div id="message">
+    test
+    <a href="#top" title="Back to Top">back to top</a>
+</div>
+<script language="javascript"
+    src="https://ajax.googleapis.com/ajax/libs/jquery/1.6.4/jquery.min.js"></script>
+<script language="javascript" type="text/javascript">
+$(function () { // run this code on page load (AKA DOM load)
+ 
+    /* set variables locally for increased performance */
+    var scroll_timer;
+    var displayed = false;
+    var $message = $('#message a');
+    var $window = $(window);
+    var top = $(document.body).children(0).position().top;
+    console.log(top)
+ 
+    /* react to scroll event on window */
+    $window.scroll(function () {
+        window.clearTimeout(scroll_timer);
+        scroll_timer = window.setTimeout(function () { // use a timer for performance
+            console.log($window.scrollTop());
+            if($window.scrollTop() <= 0) // hide if at the top of the page
+            {
+                displayed = false;
+                $message.fadeOut(500);
+                console.log('at top');
+            }
+            else if(displayed == false) // show if scrolling down
+            {
+                displayed = true;
+                $message.stop(true, true).show().click(function () { $message.fadeOut(500); });
+            }
+        }, 100);
+    });
+});
+</script>
 </body>
 </html>
