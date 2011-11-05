@@ -35,8 +35,8 @@ a {
 }
 
 #center-container {
-    height:300px;
-    width:1000px;
+    height:600px;
+    width:600px;
     position:relative;
     top:0;
 }
@@ -99,8 +99,8 @@ a { text-decoration: none}
 
 #infovis {
     position:relative;
-    height:300px;
-    width:1000px;
+    height:600px;
+    width:600px;
     margin:auto;
     overflow:hidden;
 }

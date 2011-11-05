@@ -46,7 +46,7 @@ var Log = {
     this.elem.style.left = (300 - this.elem.offsetWidth / 2) + 'px';
   }
 };
-    
+
 function init(){
 var json =
   {% for node in nodelist %}
@@ -81,12 +81,22 @@ var json =
       //Change node and edge styles such as
       //color, width and dimensions.
       Node: {
-          dim: 20,
-          color: "#f00"
+          dim: 30,
+          color: "#ccc",
+      CanvasStyles: {
+        shadowColor: '#0cc',
+        shadowBlur: 5
+      }	  	  
       },
       Edge: {
-          lineWidth: 2,
-          color: "#088"
+	  dim: 15,
+          lineWidth: 4,
+          color: "#088",
+	  type:'line',
+      CanvasStyles: {
+        shadowColor: '#ccc',
+        shadowBlur: 10
+      }	  
       },
       onBeforeCompute: function(node){
 	  $('html').removeHighlight();
@@ -114,13 +124,11 @@ var json =
           style.cursor = 'pointer';
           if (node._depth <= 1) {
 	      var topMargin = 10,rigntMargin = 1,bottomMargin = 1,leftMargin = 1;
-              style.fontSize = "1.3em";
-	      style.fontStyle = "bold";
-              style.color = "#ddd";
-
-          } else if(node._depth == 2){
-              style.fontSize = "1em";
-              style.color = "#555";
+              style.fontSize = "12pt";
+              style.color = "#fff";
+          } else if(node._depth >= 2){
+              style.fontSize = "8pt";
+              style.color = "#aaa";
 
           } else {
               style.display = 'none';
@@ -129,6 +137,7 @@ var json =
           var left = parseInt(style.left);
           var w = domElement.offsetWidth;
           style.left = (left - w / 2) + 'px';
+	  style.top  = parseInt(style.top) + 25 + 'px';
       },
       
       onComplete: function(){
@@ -149,22 +158,40 @@ var json =
 	  node.data.next = decodeURI(node.data.next);
 	  node.data.next = node.data.next.replace(/\&\#39\;/g, "'");	  
 	  $('#inner-details').highlight(node.data.next);
-	  scroller('signal', 1000)
+	  scroller('signal', 500);
       }
     });
     //load JSON data.
     ht.loadJSON(json);
+
     //compute positions and plot.
     ht.refresh();
     //end
     ht.controller.onComplete();
+    
+}
+
+function transmit(){
+    var start = document.getElementById('start').value;
+    var end = document.getElementById('end').value;
+    window.location='/test/'+encodeURIComponent(start)+'/'+encodeURIComponent(end)
 }
 </script>
-
-
 </head>
 
+
 <body onload="init();">
+<form action="/link" method="post">
+{% csrf_token %}
+<div id="topDiv" style="background-color:
+			#1A1A1A;width:1000px;margin:0px
+			auto;color:white;padding-top:40px">
+start  <input type="text" value="Yahoo!" name="start"/>
+end  <input type="text" value="Microsoft" name="end"/>
+<input type="submit" text="submit" />
+</div>
+</form>    
+
 <div id="container">
 
  <!-- <div id="left-container">  -->
@@ -174,7 +201,9 @@ var json =
 <div id="center-container">
     <div id="infovis"></div>    
 </div>
-
+<br/>
+<br/>
+<br/>    
 <!-- <div id="right-container"> -->
 
 <div id="inner-details"></div>

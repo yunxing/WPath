@@ -71,7 +71,7 @@ def getPath(start, end):
             obj = queue[i]
         except IndexError:
             return []
-
+        print "====iteration====" + str(i)
         queryList = getNeighbor(obj["content"])
         h[obj["content"]] = True
         for neighbor in queryList:
@@ -116,6 +116,7 @@ def getPath(start, end):
         for i in range(len(r) - 1):
             r[i]["next"] = r[i + 1]["content"]
         r[-1]["next"] = r[0]["content"]
+        r.reverse()        
         print "--reversed"
     except Exception, inst:
         print inst

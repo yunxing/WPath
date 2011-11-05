@@ -1147,7 +1147,6 @@ Options.Canvas = {
 */
 Options.Tree = {
     $extend: true,
-    
     orientation: "left",
     subtreeOffset: 8,
     siblingOffset: 5,
@@ -1805,7 +1804,7 @@ Options.Navigation = {
   enable: false,
   type: 'auto',
   panning: false, //true | 'avoid nodes'
-  zooming: false
+  zooming: true
 };
 
 /*
@@ -2616,6 +2615,7 @@ Extras.Classes.Navigation = new Class({
   initializePost: function() {
     this.pos = false;
     this.pressed = false;
+
   },
   
   onMouseWheel: function(e, win, scroll) {
@@ -2751,6 +2751,7 @@ var Canvas;
     labelContainer: false,
     translateOffsetX: 0,
     translateOffsetY: 0,
+      //modified
     scaleOffsetX: 1,
     scaleOffsetY: 1,
     
@@ -3002,6 +3003,7 @@ var Canvas;
     path: function(type, action){
       var ctx = this.canvases[0].getCtx();
       ctx.beginPath();
+
       action(ctx);
       ctx[type]();
       ctx.closePath();
