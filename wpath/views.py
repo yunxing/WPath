@@ -13,9 +13,10 @@ def index(request):
     })
     return HttpResponse(t.render(c))
 
-def test(request):
-    t = loader.get_template('index/test.html')
-    l = getPath.getNeighbor("yahoo")
+def test(request, start, end):
+    print "invoked by " + start + " " + end
+    t = loader.get_template('index/example2.html')
+    l = getPath.getPath(start, end)
     c = Context({
             'nodelist': l,
     })

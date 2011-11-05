@@ -1,0 +1,187 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+<title>Hypertree - Tree Animation</title>
+
+<!-- CSS Files -->
+<link type="text/css" href="/media/css/base.css" rel="stylesheet" />
+<link type="text/css" href="/media/css/Hypertree.css" rel="stylesheet" />
+
+<!--[if IE]><script language="javascript" type="text/javascript" src="../../Extras/excanvas.js"></script><![endif]-->
+
+<!-- JIT Library File -->
+<!-- Example File -->
+<script language="javascript" type="text/javascript"
+	src="/media/js/jit.js"></script>
+<script language="javascript" type="text/javascript"
+	src="/media/js/jquery.js"></script>
+<script language="javascript" type="text/javascript"
+	src="/media/js/highlight.js"></script>
+<script language="javascript" type="text/javascript"
+	src="/media/js/scroller.js"></script>    
+<script language="javascript" type="text/javascript">
+var labelType, useGradients, nativeTextSupport, animate;
+(function() {
+  var ua = navigator.userAgent,
+      iStuff = ua.match(/iPhone/i) || ua.match(/iPad/i),
+      typeOfCanvas = typeof HTMLCanvasElement,
+      nativeCanvasSupport = (typeOfCanvas == 'object' || typeOfCanvas == 'function'),
+      textSupport = nativeCanvasSupport 
+        && (typeof document.createElement('canvas').getContext('2d').fillText == 'function');
+  //I'm setting this based on the fact that ExCanvas provides text support for IE
+  //and that as of today iPhone/iPad current text support is lame
+  labelType = (!nativeCanvasSupport || (textSupport && !iStuff))? 'Native' : 'HTML';
+  nativeTextSupport = labelType == 'Native';
+  useGradients = nativeCanvasSupport;
+  animate = !(iStuff || !nativeCanvasSupport);
+})();
+
+var Log = {
+  elem: false,
+  write: function(text){
+    if (!this.elem) 
+      this.elem = document.getElementById('log');
+    this.elem.innerHTML = text;
+    this.elem.style.left = (300 - this.elem.offsetWidth / 2) + 'px';
+  }
+};
+    
+function init(){
+var json =
+  {% for node in nodelist %}
+  {
+    "id": "{{node.content}}",
+    "name": "{{node.content}}",
+      "data": {
+      "next":"{{node.next}}",
+	"band":"what the fuck",
+        "relation": "{{node.href}}",
+	"html": "{{node.html}}",
+},  
+    "children":
+  	[
+  {% endfor %}
+  {% for node in nodelist %}
+    	]
+  }
+  {% endfor %}  
+;	
+    //end
+    var infovis = document.getElementById('infovis');
+    var w = infovis.offsetWidth - 50, h = infovis.offsetHeight - 50;
+    
+    //init Hypertree
+    var ht = new $jit.Hypertree({
+      //id of the visualization container
+      injectInto: 'infovis',
+      //canvas width and height
+      width: w,
+      height: h,
+      //Change node and edge styles such as
+      //color, width and dimensions.
+      Node: {
+          dim: 20,
+          color: "#f00"
+      },
+      Edge: {
+          lineWidth: 2,
+          color: "#088"
+      },
+      onBeforeCompute: function(node){
+	  $('html').removeHighlight();
+	  console.log(node.name);
+	  console.log(node.data.next);	  
+      },
+      //Attach event handlers and add text to the
+      //labels. This method is only triggered on label
+      //creation
+      onCreateLabel: function(domElement, node){
+          domElement.innerHTML = node.name;
+          $jit.util.addEvent(domElement, 'click', function () {
+              ht.onClick(node.id, {
+                  onComplete: function() {
+                      ht.controller.onComplete();
+                  }
+              });
+          });
+      },
+      //Change node styles when labels are placed
+      //or moved.
+      onPlaceLabel: function(domElement, node){
+          var style = domElement.style;
+          style.display = '';
+          style.cursor = 'pointer';
+          if (node._depth <= 1) {
+	      var topMargin = 10,rigntMargin = 1,bottomMargin = 1,leftMargin = 1;
+              style.fontSize = "1.3em";
+	      style.fontStyle = "bold";
+              style.color = "#ddd";
+
+          } else if(node._depth == 2){
+              style.fontSize = "1em";
+              style.color = "#555";
+
+          } else {
+              style.display = 'none';
+          }
+
+          var left = parseInt(style.left);
+          var w = domElement.offsetWidth;
+          style.left = (left - w / 2) + 'px';
+      },
+      
+      onComplete: function(){
+          //Build the right column relations list.
+          //This is done by collecting the information (stored in the data property) 
+          //for all the nodes adjacent to the centered node.
+          var node = ht.graph.getClosestNodeToOrigin("current");
+	  var html = node.data.html;
+	  html = html.replace(/\%2C/g, ",");
+	  html = html.replace(/\%3B/g, ";");
+	  html = html.replace(/\%3A/g, ":");	  
+	  html = html.replace(/\%26/g, "&");
+	  html = decodeURI(html);
+	  html = html.replace(/\%3D/g, "=");
+	  html = html.replace(/\&\%23160\;/g, " ");
+          $jit.id('inner-details').innerHTML = html;
+	  node.data.next = node.data.next.replace(/\_/g, " ");
+	  node.data.next = decodeURI(node.data.next);
+	  node.data.next = node.data.next.replace(/\&\#39\;/g, "'");	  
+	  $('#inner-details').highlight(node.data.next);
+	  scroller('signal', 1000)
+      }
+    });
+    //load JSON data.
+    ht.loadJSON(json);
+    //compute positions and plot.
+    ht.refresh();
+    //end
+    ht.controller.onComplete();
+}
+</script>
+
+
+</head>
+
+<body onload="init();">
+<div id="container">
+
+ <!-- <div id="left-container">  -->
+ <!--   left-container</br> -->
+ <!-- </div>  -->
+
+<div id="center-container">
+    <div id="infovis"></div>    
+</div>
+
+<!-- <div id="right-container"> -->
+
+<div id="inner-details"></div>
+
+<!-- </div> -->
+
+<div id="log"></div>
+</div>
+</body>
+</html>
