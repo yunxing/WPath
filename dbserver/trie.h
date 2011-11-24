@@ -31,21 +31,27 @@ class Trie{
 	Trie();
 	/* deconstructor */
 	~Trie();
-	/* add a leaf */
+	/* Add a leaf
+	   Will build internal nodes automatically
+	   All the leaf that are added by "import" will not be dump by default
+	*/
 	void add(const string& label, const vector<string>& content);
 	/* find a leaf
 	   if not found, return false
 	 */
 	vector<string> find(const string& label) const;
-	/* dump to file */
-	void dump(const string& file);
+	/* dump to file
+	   by default it will not dump leafs that are 
+	 */
+	void dump(const string& file, bool newDump = false);
 	/* import from file */
 	void import(const string& file);
 	
   private:
+	bool finishImport;
 	Node * root;
 	void deleteNode(Node*);
-	void writeNode(Node*, ofstream&);
+	void writeNode(Node*, ofstream&, bool newDump);
 };
 
 #endif

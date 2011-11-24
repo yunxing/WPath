@@ -3,6 +3,7 @@
 Trie::Trie()
 {
 	root = new Node("");
+	finishImport = false;
 }
 
 void Trie::deleteNode(Node* n)
@@ -19,8 +20,7 @@ Trie::~Trie()
 	debug("tree deleted");
 }
 
-void Trie::add(const string& label, const vector<string>& content)
-{
+void Trie::add(const string& label, const vector<string>& content){
 	Node * cursor = root;
 	string::const_iterator i;
 	string soFar = "";
@@ -37,7 +37,7 @@ void Trie::add(const string& label, const vector<string>& content)
 		}
 	}
 	cursor->content = content;
-	cursor->newNode = true;
+	cursor->newNode = finishImport;
 }
 
 vector<string> Trie::find(const string& label) const
@@ -56,11 +56,11 @@ vector<string> Trie::find(const string& label) const
 	return cursor->content;
 }
 
-void Trie::writeNode(Node* n, ofstream& of)
+void Trie::writeNode(Node* n, ofstream& of, bool newDump)
 {
 	if (!n)
 		return;
-	if (n->newNode && n->content.size())
+	if (n->content.size() && (newDump || n->newNode))
 	{
 		of << n->label;
 		vector<string>::const_iterator i;
@@ -69,29 +69,40 @@ void Trie::writeNode(Node* n, ofstream& of)
 		of << endl;
 	}
 	for (unsigned int i = 0; i < MAX_EDGES; ++i)
-		writeNode(n->edges[i], of);
+		writeNode(n->edges[i], of, newDump);
 }
 
-void 
+void Trie::import(const string& file)
+{
+	ifstream is(file.c_str(), ios::in);
+	string index;
+	string word;
+	string line;
+	assert(is);
+	debug("start reading");
+	while(is.good())
+	{
+		getline (is, line);
+		//null line
+		if(!line.size())
+			continue;
+		stringstream ss(line);
+		ss >> index;
+		vector<string> content;
+		while (ss)
+		{
+			ss >> word;
+			content.push_back(word);
+		}
+		this->add(index, content);
+	}
+	finishImport = true;
+	debug("importing finished");
+}
 
-void Trie::dump(const string& file)
+void Trie::dump(const string& file, bool newDump)
 {
 	ofstream of(file.c_str(), ios::app|ios::out);
 	assert(of);
-	writeNode(root, of);
-}
-
-int main()
-{
-	Trie t;
-	vector<string> vs;
-	vs.push_back("loaf");
-	vs.push_back("asdf");
-	t.add("hello", vs);
-	t.add("hell", vs);
-	t.add("h", vs);
-	vs = t.find("h");
-	for (size_t i = 0; i < vs.size(); ++i)
-		cout << vs[i] << endl;
-	t.dump("db");
+	writeNode(root, of, newDump);
 }
