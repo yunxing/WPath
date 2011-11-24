@@ -23,7 +23,9 @@ class Node:
     parent = 0
 
 def getRealName(name):
+    name = name.replace(" ", "%20")
     result = ""
+    print nameURL + name
     doc = xml.dom.minidom.parseString(urllib2.urlopen(nameURL + name).read())
     l = doc.getElementsByTagName("Url")
     

@@ -7,7 +7,30 @@
 <!-- CSS Files -->
 <link type="text/css" href="/media/css/base.css" rel="stylesheet" />
 <link type="text/css" href="/media/css/Hypertree.css" rel="stylesheet" />
-
+<style type="text/css">
+    #message a{
+        display:block;
+        display:none;
+        right:5px;
+        position:fixed;
+        bottom:5px;
+        right:10px;
+        z-index: 999; 
+        -moz-border-radius: 24px;
+        -webkit-border-radius: 24px;
+        width: 100px;
+        line-height: 28px;
+        text-decoration:none;
+        height: 28px;
+        opacity: .8;
+        padding: 5px;
+        background-color: #000;
+        font-size: 14px;
+        text-align: center;
+        color: #fff;
+    }
+</style>
+    
 <!--[if IE]><script language="javascript" type="text/javascript" src="../../Extras/excanvas.js"></script><![endif]-->
 
 <!-- JIT Library File -->
@@ -183,12 +206,16 @@ function transmit(){
 <body onload="init();">
 <form action="/link" method="post">
 {% csrf_token %}
-<div id="topDiv" style="background-color:
+<div id="top" style="background-color:
 			#1A1A1A;width:1000px;margin:0px
 			auto;color:white;padding-top:40px">
-start  <input type="text" value="Yahoo!" name="start"/>
-end  <input type="text" value="Microsoft" name="end"/>
+start  <input type="text" value="" name="start"/>
+end  <input type="text" value="" name="end"/>
 <input type="submit" text="submit" />
+<br/>
+<br/>
+    <h2>Welcome to WPath!</h2>
+    This is an application to help you to find invisible connections between things that you never thought related.
 </div>
 </form>    
 
@@ -212,5 +239,40 @@ end  <input type="text" value="Microsoft" name="end"/>
 
 <div id="log"></div>
 </div>
+<div id="message">
+
+    <a href="#top" title="Back to Top">back to top</a>
+</div>    
+<script language="javascript" type="text/javascript">
+$(function () { // run this code on page load (AKA DOM load)
+ 
+    /* set variables locally for increased performance */
+    var scroll_timer;
+    var displayed = false;
+    var $message = $('#message a');
+    var $window = $(window);
+    var top = $(document.body).children(0).position().top;
+    console.log(top)
+ 
+    /* react to scroll event on window */
+    $window.scroll(function () {
+        window.clearTimeout(scroll_timer);
+        scroll_timer = window.setTimeout(function () { // use a timer for performance
+            console.log($window.scrollTop());
+            if($window.scrollTop() <= 0) // hide if at the top of the page
+            {
+                displayed = false;
+                $message.fadeOut(500);
+                console.log('at top');
+            }
+            else if(displayed == false) // show if scrolling down
+            {
+                displayed = true;
+                $message.stop(true, true).show().click(function () { $message.fadeOut(500); });
+            }
+        }, 100);
+    });
+});
+</script>    
 </body>
 </html>

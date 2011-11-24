@@ -15,7 +15,7 @@ def index(request):
 
 def test(request):
     start = request.POST['start']
-    end = request.POST['end']    
+    end = request.POST['end']
     l = getPath.getPath(start, end)
     return render_to_response('index/example2.html', {'nodelist': l},
                                context_instance=RequestContext(request))    
