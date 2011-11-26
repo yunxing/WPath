@@ -21,6 +21,7 @@ Trie::~Trie()
 }
 
 void Trie::add(const string& label, const vector<string>& content){
+	debug(string("adding") + label);
 	Node * cursor = root;
 	string::const_iterator i;
 	string soFar = "";
@@ -40,9 +41,23 @@ void Trie::add(const string& label, const vector<string>& content){
 	cursor->newNode = finishImport;
 }
 
-vector<string> Trie::find(const string& label) const
+vector<string>& Trie::get(const string& label) const
 {
 	Node* cursor = root;
+	debug(string("getting") + label);
+	string::const_iterator i;
+	string soFar = "";
+	for (i = label.begin(); i != label.end(); ++i)
+	{
+		soFar.push_back(*i);
+		cursor = cursor->edges[(unsigned int)*i];
+	}
+	return cursor->content;
+}
+bool Trie::find(const string& label) const
+{
+	Node* cursor = root;
+	debug(string("finding") + label);
 	string::const_iterator i;
 	string soFar = "";
 	
@@ -50,10 +65,11 @@ vector<string> Trie::find(const string& label) const
 	{
 		soFar.push_back(*i);
 		if (!cursor->edges[(unsigned int)*i])
-			return vector<string>();
+			return false;
 		cursor = cursor->edges[(unsigned int)*i];
 	}
-	return cursor->content;
+	return !cursor->content.empty();
+
 }
 
 void Trie::writeNode(Node* n, ofstream& of, bool newDump)
@@ -104,5 +120,7 @@ void Trie::dump(const string& file, bool newDump)
 {
 	ofstream of(file.c_str(), ios::app|ios::out);
 	assert(of);
+	debug("dumping to file");
 	writeNode(root, of, newDump);
+	debug("dump finished");
 }

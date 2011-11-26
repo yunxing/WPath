@@ -36,10 +36,14 @@ class Trie{
 	   All the leaf that are added by "import" will not be dump by default
 	*/
 	void add(const string& label, const vector<string>& content);
-	/* find a leaf
+	/* find a leaf with the label
 	   if not found, return false
 	 */
-	vector<string> find(const string& label) const;
+	bool find(const string& label) const;
+	/* get the content of an entry
+	 */
+	vector<string>& get(const string& label) const;
+	
 	/* dump to file
 	   by default it will not dump leafs that are 
 	 */
