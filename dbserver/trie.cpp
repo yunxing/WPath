@@ -20,8 +20,7 @@ Trie::~Trie()
 	debug("tree deleted");
 }
 
-void Trie::add(const string& label, const vector<string>& content){
-	debug(string("adding") + label);
+void Trie::add(const string& label, const string& content){
 	Node * cursor = root;
 	string::const_iterator i;
 	string soFar = "";
@@ -39,9 +38,10 @@ void Trie::add(const string& label, const vector<string>& content){
 	}
 	cursor->content = content;
 	cursor->newNode = finishImport;
+	cursor->hasContent = true;
 }
 
-vector<string>& Trie::get(const string& label) const
+string& Trie::get(const string& label) const
 {
 	Node* cursor = root;
 	debug(string("getting") + label);
@@ -57,7 +57,6 @@ vector<string>& Trie::get(const string& label) const
 bool Trie::find(const string& label) const
 {
 	Node* cursor = root;
-	debug(string("finding") + label);
 	string::const_iterator i;
 	string soFar = "";
 	
@@ -68,8 +67,7 @@ bool Trie::find(const string& label) const
 			return false;
 		cursor = cursor->edges[(unsigned int)*i];
 	}
-	return !cursor->content.empty();
-
+	return cursor->hasContent;
 }
 
 void Trie::writeNode(Node* n, ofstream& of, bool newDump)
@@ -79,9 +77,8 @@ void Trie::writeNode(Node* n, ofstream& of, bool newDump)
 	if (n->content.size() && (newDump || n->newNode))
 	{
 		of << n->label;
-		vector<string>::const_iterator i;
-		for (i = n->content.begin(); i != n->content.end(); ++i)
-			of  << " "<< *i;
+		of << " ";
+		of << n->content;
 		of << endl;
 	}
 	for (unsigned int i = 0; i < MAX_EDGES; ++i)
@@ -104,13 +101,7 @@ void Trie::import(const string& file)
 			continue;
 		stringstream ss(line);
 		ss >> index;
-		vector<string> content;
-		while (ss)
-		{
-			ss >> word;
-			content.push_back(word);
-		}
-		this->add(index, content);
+		this->add(index, ss.str());
 	}
 	finishImport = true;
 	debug("importing finished");

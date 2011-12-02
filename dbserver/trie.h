@@ -10,15 +10,17 @@ const unsigned int MAX_EDGES = 260;
 */
 struct Node{
 	bool newNode;				/* new node since last added */
+	bool hasContent;
 	string label;
 	Node* edges[MAX_EDGES];
-	vector<string> content;
+	string content;
 	Node(string s)
 		{
 			label = s;
 			newNode = false;
 			for(unsigned int i = 0; i < MAX_EDGES; ++i)
 				edges[i] = 0;
+			hasContent = false;
 		}
 };
 
@@ -35,14 +37,14 @@ class Trie{
 	   Will build internal nodes automatically
 	   All the leaf that are added by "import" will not be dump by default
 	*/
-	void add(const string& label, const vector<string>& content);
+	void add(const string& label, const string& content);
 	/* find a leaf with the label
 	   if not found, return false
 	 */
 	bool find(const string& label) const;
 	/* get the content of an entry
 	 */
-	vector<string>& get(const string& label) const;
+	string& get(const string& label) const;
 	
 	/* dump to file
 	   by default it will not dump leafs that are 

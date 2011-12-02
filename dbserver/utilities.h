@@ -29,13 +29,13 @@ inline void error(const char *msg)
 inline void debug(const string& s ) 
 {
 	#ifdef DEBUG
-	cout << "DEBUG: " << s << endl;
+	//cout << "DEBUG: " << s << endl;
 	#endif
 }
 inline void debug(char const * s ) 
 {
 	#ifdef DEBUG
-	cout << "DEBUG: " << s << endl;
+	//cout << "DEBUG: " << s << endl;
 	#endif
 }
 #endif

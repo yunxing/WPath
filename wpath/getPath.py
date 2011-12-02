@@ -8,12 +8,15 @@ import HTMLParser
 import re
 import threading
 import time
+import socket
 
 queryAPIURL = u"http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles="
 
 htmlURL = "http://en.wikipedia.org/w/index.php?action=render&title="
 
 nameURL = "http://en.wikipedia.org/w/api.php?action=opensearch&limit=1&namespace=0&format=xml&search="
+
+port = 10241
 
 class Node:
     content = ""
@@ -41,7 +44,7 @@ class NameFinder(threading.Thread):
         if len(l) == 0:
             raise Exception("name no found")
         result = l[0].toxml()
-        result = result.split(r"</")[0:-1][0]
+        Result = result.split(r"</")[0:-1][0]
         result = result.split(r"/")[-1]    
         name = result        
 
@@ -50,6 +53,9 @@ class worker(threading.Thread):
         self.queue = queue
         self.h = h
         self.end = end
+        self.port = 10241
+        self.s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+
         threading.Thread.__init__(self)
         
     def run(self):
@@ -75,8 +81,10 @@ class worker(threading.Thread):
             
             print "====iter====" + str(parent)
             obj = queue[parent]
+            startTime = time.time()*1000000
+            links = getLinks(obj.content, self.s)
+            print "time used for " + obj.content + ":" + str(time.time()*1000000 - startTime)
             
-            links = getLinks(obj.content)
             if finishFlag:
                 return
             
@@ -90,22 +98,26 @@ class worker(threading.Thread):
                     queueLock.acquire()
                     queue.append(neighbor)
                     queue[len(queue) - 1].parent = parent
-                    queueLock.release()                    
+                    queueLock.release()
                     finishFlag = True
                     print "found!!!"
                     global lastElement
                     lastElement = neighbor
                     return
                 neighbor.parent = parent
-                hashLock.acquire()                
-                if not h.has_key(neighbor.content.lower()):
+                hashLock.acquire()
+
+                travelled = h.has_key(neighbor.content.lower())
+                hashLock.release()
+                if not travelled:
                     h[neighbor.content.lower()] = True
-                    hashLock.release()                    
+
                     queueLock.acquire()
                     queue.append(neighbor)
+
+                    
                     queueLock.release()
-                else:
-                    hashLock.release()
+                    
                 
 def getRealName(name):
     name = name.replace(" ", "%20")
@@ -120,13 +132,28 @@ def getRealName(name):
     result = result.split(r"/")[-1]    
     name = result
 
-def getLinks(name):
+    
+def getLinks(name, s):
+    s.sendto("F"+name, ('localhost', port))
+    if s.recvfrom(2048)[0] == 'Y':
+        print name
+        s.sendto("G"+name, ('localhost', port))
+        result = unicode(urllib.unquote(s.recvfrom(2048)[0]).decode("utf-8")).rstrip().split(' ')
+        if result == ['']:
+            print "no result!"
+            return []
+        return result
+    print "no hits!"
+    
     try:
         doc = xml.dom.minidom.parseString(urllib2.urlopen("http://en.wikipedia.org/w/api.php?action=query&prop=revisions&rvprop=content&format=xml&titles=" + name).read())
         xmlRow= doc.getElementsByTagName("rev")
         result = xmlRow[0].toxml()
     except Exception,e:
         print e
+        newEntry = "A" + name
+        s.sendto((newEntry), ('localhost', 10241))
+        s.recvfrom(2048)[0]        
         return []
     result = result.split(r">")[1]
     result = result.split(r"<")[0]
@@ -143,14 +170,15 @@ def getLinks(name):
     links=map(lambda x: x[2:-2], links)
     links=map(lambda x: x.split(r"|")[0], links)
     links=map(lambda x: x.replace(r" ", r"_"), links)
-    links=map(lambda x: x.replace(u"\u2013", r"-"), links)
-    links=map(lambda x: x.replace(u"\u2014", r"'"), links)
-    links=map(lambda x: x.replace(u"\u2019", r"'"), links)    
-    links=map(lambda x: x.replace(u"\u200e", r""), links)
-    links=map(lambda x: x.replace(u"\u0101", r""), links)
     links=filter(lambda x: x.lower().find(r"list_of") == -1, links)
+    links=map(lambda x: x.encode("utf-8"), links)
+    links=map(lambda x: urllib.quote(x), links)    
     print "searching for : " + name
-    print links
+    newEntry = "A" + name
+    for l in links:
+        newEntry += " "+l
+    s.sendto((newEntry), ('localhost', 10241))
+    s.recvfrom(2048)[0]
     return links
     
 def getPath(start, end):
@@ -198,6 +226,4 @@ def getPath(start, end):
     return r
         
 if __name__ == '__main__':
-    getPath("Fantastic Contraption", "polar bear")
-    print "end"
-    #getLinks(getRealName("South_pole"))
+    getPath("google", "polar_bear")
